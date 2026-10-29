@@ -27,9 +27,9 @@ io.on("connection", (socket) => {
 
     // 3. Respuesta de Foundry hacia la App (Envío de la ficha completa)
     socket.on("CHARACTER_DATA", (data) => {
-        console.log(`📤 [${data.roomId}] Datos de ficha recibidos de Foundry, enviando a la sala...`);
-        // Emitimos a toda la sala para que la app reciba el objeto
-        io.to(data.roomId).emit("CHARACTER_DATA", data);
+        console.log(`📤 [${data.roomId}] Datos de ficha recibidos de Foundry, reenviando a la app...`);
+        // Reenviamos a los demás miembros de la sala (al móvil)
+        socket.to(data.roomId).emit("CHARACTER_DATA", data);
     });
 
     // 4. Cambios de vida desde el Móvil hacia Foundry
