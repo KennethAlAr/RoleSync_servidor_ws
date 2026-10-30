@@ -74,4 +74,9 @@ io.on("connection", (socket) => {
     socket.on("COMBAT_STATE_UPDATE", (data) => {
         socket.to(data.roomId).emit("COMBAT_STATE_UPDATE", data);
     });
+
+    socket.on("ROLL_SAVING_THROW", (data) => {
+        console.log(`🎲 [${data.roomId}] Petición de Salvación (${data.ability}) para: ${data.characterId}`);
+        io.to(data.roomId).emit("ROLL_SAVING_THROW", data);
+    });
 });
