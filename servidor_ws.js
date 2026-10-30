@@ -11,7 +11,7 @@ console.log(`[SERVIDOR] Iniciado en el puerto ${PUERTO}`);
 io.on("connection", (socket) => {
     console.log(`🟢 Cliente conectado: ${socket.id}`);
 
-    // 1. Unirse a la sala (sirve tanto para el móvil como para Foundry)
+    // 1. Unirse a la sala
     socket.on("JOIN_ROOM", ({ roomId }) => {
         if (!roomId) return;
         socket.join(roomId);
@@ -21,18 +21,32 @@ io.on("connection", (socket) => {
     // 2. Petición de la App hacia Foundry (Pedir datos iniciales)
     socket.on("REQUEST_CHARACTER_DATA", (data) => {
         console.log(`📩 [${data.roomId}] Petición de datos para el personaje: ${data.characterId}`);
-        // Reenviamos a todos los sockets de la sala (a Foundry) excepto al emisor
         socket.to(data.roomId).emit("REQUEST_CHARACTER_DATA", data);
     });
 
-    // 3. Respuesta de Foundry hacia la App (Envío de la ficha completa)
-    socket.on("CHARACTER_DATA", (data) => {
-        console.log(`📤 [${data.roomId}] Datos de ficha recibidos de Foundry, reenviando a la app...`);
-        // Reenviamos a los demás miembros de la sala (al móvil)
-        socket.to(data.roomId).emit("CHARACTER_DATA", data);
+    // 3. Respuesta fragmentada de Foundry hacia la App (Hidratación inicial)
+    socket.on("PLAYER_INFO", (data) => {
+        console.log(`📤 [${data.roomId}] Info de Jugador recibida, reenviando a la app...`);
+        socket.to(data.roomId).emit("PLAYER_INFO", data);
     });
 
-    // 4. Cambios de vida desde el Móvil hacia Foundry
+    socket.on("HEALTH_INFO", (data) => {
+        console.log(`📤 [${data.roomId}] Info de Salud recibida, reenviando a la app...`);
+        socket.to(data.roomId).emit("HEALTH_INFO", data);
+    });
+
+    socket.on("SAVING_THROWS_INFO", (data) => {
+        console.log(`📤 [${data.roomId}] Info de Salvaciones recibida, reenviando a la app...`);
+        socket.to(data.roomId).emit("SAVING_THROWS_INFO", data);
+    });
+
+    // 4. Cambios en vivo desde Foundry hacia el Móvil (DM o efectos)
+    socket.on("HEALTH_UPDATE", (data) => {
+        console.log(`🔄 [${data.roomId}] Cambio de Vida en Foundry reenviado a la app:`, data);
+        socket.to(data.roomId).emit("HEALTH_UPDATE", data);
+    });
+
+    // 5. Cambios de vida desde el Móvil hacia Foundry
     socket.on("UPDATE_HP", (data) => {
         console.log(`❤️ [${data.roomId}] Actualización de HP:`, data);
         socket.to(data.roomId).emit("UPDATE_HP", data);
@@ -41,12 +55,6 @@ io.on("connection", (socket) => {
     socket.on("UPDATE_TEMP_HP", (data) => {
         console.log(`🛡️ [${data.roomId}] Actualización de Temp HP:`, data);
         socket.to(data.roomId).emit("UPDATE_TEMP_HP", data);
-    });
-
-    // 5. Cambios desde Foundry hacia el Móvil (cuando el DM o un efecto modifica la ficha)
-    socket.on("CHARACTER_UPDATE", (data) => {
-        console.log(`🔄 [${data.roomId}] Cambio en Foundry reenviado a la app:`, data);
-        socket.to(data.roomId).emit("CHARACTER_UPDATE", data);
     });
 
     socket.on("disconnect", () => {
