@@ -75,8 +75,22 @@ io.on("connection", (socket) => {
         socket.to(data.roomId).emit("COMBAT_STATE_UPDATE", data);
     });
 
+    // socket.on("ROLL_SAVING_THROW", (data) => {
+    //     console.log(`🎲 [${data.roomId}] Petición de Salvación (${data.ability}) para: ${data.characterId}`);
+    //     io.to(data.roomId).emit("ROLL_SAVING_THROW", data);
+    // });
+
     socket.on("ROLL_SAVING_THROW", (data) => {
         console.log(`🎲 [${data.roomId}] Petición de Salvación (${data.ability}) para: ${data.characterId}`);
-        io.to(data.roomId).emit("ROLL_SAVING_THROW", data);
+        
+        // Si el paquete trae un userId, lo mandamos SOLO a ese jugador
+        if (data.userId) {
+            console.log(`🎯 Redirigiendo tirada directamente al usuario: ${data.userId}`);
+            io.to(data.userId).emit("ROLL_SAVING_THROW", data);
+        } else {
+            // Si no lo trae (por si acaso), lo mandamos a toda la sala como antes
+            console.log("No se ha podido redirigir directamente")
+            io.to(data.roomId).emit("ROLL_SAVING_THROW", data);
+        }
     });
 });
