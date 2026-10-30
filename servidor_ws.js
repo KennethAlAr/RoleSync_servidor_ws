@@ -11,11 +11,25 @@ console.log(`[SERVIDOR] Iniciado en el puerto ${PUERTO}`);
 io.on("connection", (socket) => {
     console.log(`🟢 Cliente conectado: ${socket.id}`);
 
+    // // 1. Unirse a la sala
+    // socket.on("JOIN_ROOM", ({ roomId }) => {
+    //     if (!roomId) return;
+    //     socket.join(roomId);
+    //     console.log(`👥 Socket ${socket.id} se unió a la sala: [${roomId}]`);
+    // });
+
     // 1. Unirse a la sala
-    socket.on("JOIN_ROOM", ({ roomId }) => {
-        if (!roomId) return;
-        socket.join(roomId);
-        console.log(`👥 Socket ${socket.id} se unió a la sala: [${roomId}]`);
+    socket.on("JOIN_ROOM", ({ roomId, userId }) => { // 👈 Recibimos también el userId
+        if (roomId) {
+            socket.join(roomId);
+            console.log(`👥 Socket ${socket.id} se unió a la sala general: [${roomId}]`);
+        }
+        
+        // 👈 Si nos pasan userId, creamos el canal privado para este jugador
+        if (userId) {
+            socket.join(userId); 
+            console.log(`👤 Socket ${socket.id} registrado como jugador: [${userId}]`);
+        }
     });
 
     // 2. Petición de la App hacia Foundry (Pedir datos iniciales)
