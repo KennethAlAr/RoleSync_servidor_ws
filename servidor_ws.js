@@ -75,9 +75,22 @@ io.on("connection", (socket) => {
         console.log(`🔴 Cliente desconectado: ${socket.id}`);
     });
 
+    // socket.on("ROLL_INITIATIVE", (data) => {
+    //     console.log(`🎲 [${data.roomId}] Petición de Iniciativa para el personaje: ${data.characterId}`);
+    //     socket.to(data.roomId).emit("ROLL_INITIATIVE", data);
+    // });
+
     socket.on("ROLL_INITIATIVE", (data) => {
         console.log(`🎲 [${data.roomId}] Petición de Iniciativa para el personaje: ${data.characterId}`);
-        socket.to(data.roomId).emit("ROLL_INITIATIVE", data);
+        
+        // Si el paquete trae un userId, lo mandamos SOLO al canal privado de ese jugador
+        if (data.userId) {
+            console.log(`🎯 Redirigiendo iniciativa directamente al usuario: ${data.userId}`);
+            io.to(data.userId).emit("ROLL_INITIATIVE", data);
+        } else {
+            // Comportamiento de respaldo (a toda la sala)
+            io.to(data.roomId).emit("ROLL_INITIATIVE", data);
+        }
     });
 
     socket.on("PLAYER_UPDATE", (data) => {
