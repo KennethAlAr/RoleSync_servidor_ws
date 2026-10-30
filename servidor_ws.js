@@ -65,4 +65,9 @@ io.on("connection", (socket) => {
         console.log(`🎲 [${data.roomId}] Petición de Iniciativa para el personaje: ${data.characterId}`);
         socket.to(data.roomId).emit("ROLL_INITIATIVE", data);
     });
+
+    socket.on("PLAYER_UPDATE", (data) => {
+        console.log(`🔄 [${data.roomId}] Cambio de stats en Foundry, reenviando a la app...`);
+        socket.to(data.roomId).emit("PLAYER_UPDATE", data);
+    });
 });
