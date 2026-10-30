@@ -60,4 +60,9 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log(`🔴 Cliente desconectado: ${socket.id}`);
     });
+
+    socket.on("ROLL_INITIATIVE", (data) => {
+        console.log(`🎲 [${data.roomId}] Petición de Iniciativa para el personaje: ${data.characterId}`);
+        socket.to(data.roomId).emit("ROLL_INITIATIVE", data);
+    });
 });
