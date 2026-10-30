@@ -70,4 +70,8 @@ io.on("connection", (socket) => {
         console.log(`🔄 [${data.roomId}] Cambio de stats en Foundry, reenviando a la app...`);
         socket.to(data.roomId).emit("PLAYER_UPDATE", data);
     });
+
+    socket.on("COMBAT_STATE_UPDATE", (data) => {
+        socket.to(data.roomId).emit("COMBAT_STATE_UPDATE", data);
+    });
 });
